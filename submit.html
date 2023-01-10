@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<head>
+
+</head>
+<style>
+    /* html {
+        height: 100%;
+    }
+    body {
+        height: 100%;
+    } */
+    #form-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        /* border: 1px red solid; */
+        height: 100%;
+    }
+    #form {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    #form > #search-input {
+        width: 45%;
+        text-align: center;
+        font-size: 20px;
+        height: 40px;
+    }
+    #form > #search-btn {
+        margin: 20px;
+        width: 15%;
+        font-size: 18px;
+    }
+</style>
+<body>
+    <div id="form-div">
+        <div id="form">
+            <input name="search" id="search-input" type="text" placeholder="Search for an Okta Feature"/>
+            <!-- <button id="search-btn">Search</button> -->
+        </div>
+    </div>
+    <div id="res-div">
+
+    </div>
+</body>
+<script>
+        let searchInput = document.getElementById('search-input');
+        // let searchButton = document.getElementById('search-btn');
+        let resultsDiv = document.getElementById("res-div");
+
+        const search = async (search) => {
+            let options = {
+                method: "POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({search})
+            }
+            let res = await fetch("/search", options);
+            res = await res.json();
+            return res;
+        
+        }
+        searchInput.oninput = async (e) => {
+            let searchTerm = e.target.value;
+            let results = await search(searchTerm);
+            // Clear resultsDiv every time
+            while (resultsDiv.firstChild) {
+                    resultsDiv.removeChild(resultsDiv.firstChild);
+                }
+            results.forEach(result => {
+                
+                // Title is the feature name - WIP
+                let title = Object.keys(result)[0];
+                // strings
+                // there may not be a description or more info link
+                // TBD what to do when this is the case
+                let description = result[title]["description"];
+                let moreInfoLink = result[title]["moreInfoLink"];
+                // this is an array
+                let editions_skus = result[title]["editions_skus"];
+
+                let thisDiv = document.createElement("div");
+                thisDiv.style.margin = "8px";
+                thisDiv.style.paddingLeft = "15px";
+                thisDiv.style.border = "1px black solid";
+
+                let h1 = document.createElement("h2");
+                let h = document.createTextNode(title);
+                h1.appendChild(h);
+
+                let p = document.createElement("p");
+                let n = document.createTextNode(`Description: ${description}`);
+                p.appendChild(n);
+
+                let mip = document.createElement("a");
+                mip.innerText = "More info";
+                if(moreInfoLink) {
+                    mip.href = moreInfoLink;
+                    mip.target = "_blank";
+                }
+
+                // Add the title, description, more info link
+                thisDiv.appendChild(h1);
+                thisDiv.appendChild(p);
+                thisDiv.appendChild(mip);
+
+                // Add the skus and editions 
+                editions_skus.forEach((item) => {
+                    // new div for each editions + skus
+                    let itemDiv = document.createElement("div");
+                    let itemP = document.createElement("p");
+                    let itemN = document.createTextNode(`${item['edition']} - ${item['sku']}`);
+                    itemP.appendChild(itemN);
+                    itemDiv.appendChild(itemP);
+                    thisDiv.appendChild(itemDiv);
+                })
+                
+                resultsDiv.appendChild(thisDiv)
+
+                // All json
+                // let title = JSON.stringify(result)
+                // let thisDiv = document.createElement("div")
+                // thisDiv.style.margin = "5px";
+                // thisDiv.innerText = title
+                // resultsDiv.appendChild(thisDiv)
+                
+            })
+        }
+
+</script>
+</html>
