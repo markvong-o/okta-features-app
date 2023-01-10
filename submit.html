@@ -35,6 +35,11 @@
         width: 15%;
         font-size: 18px;
     }
+    #res-div {
+        display: grid;
+        grid-template-columns:auto auto;
+
+    }
 </style>
 <body>
     <div id="form-div">
@@ -44,13 +49,20 @@
         </div>
     </div>
     <div id="res-div">
+        <div id="title-div">
 
+        </div>
+        <div id="sku-div">
+
+        </div>
     </div>
 </body>
 <script>
         let searchInput = document.getElementById('search-input');
         // let searchButton = document.getElementById('search-btn');
         let resultsDiv = document.getElementById("res-div");
+        let titlesDiv = document.getElementById("title-div");
+        let skusDiv = document.getElementById("sku-div");
 
         const search = async (search) => {
             let options = {
@@ -69,11 +81,10 @@
             let searchTerm = e.target.value;
             let results = await search(searchTerm);
             // Clear resultsDiv every time
-            while (resultsDiv.firstChild) {
-                    resultsDiv.removeChild(resultsDiv.firstChild);
+            while (titlesDiv.firstChild) {
+                    titlesDiv.removeChild(titlesDiv.firstChild);
                 }
             results.forEach(result => {
-                
                 // Title is the feature name - WIP
                 let title = Object.keys(result)[0];
                 // strings
@@ -89,7 +100,7 @@
                 thisDiv.style.paddingLeft = "15px";
                 thisDiv.style.border = "1px black solid";
 
-                let h1 = document.createElement("h2");
+                let h1 = document.createElement("h3");
                 let h = document.createTextNode(title);
                 h1.appendChild(h);
 
@@ -110,6 +121,7 @@
                 thisDiv.appendChild(mip);
 
                 // Add the skus and editions 
+                let skuDivArr = [];
                 editions_skus.forEach((item) => {
                     // new div for each editions + skus
                     let itemDiv = document.createElement("div");
@@ -117,10 +129,25 @@
                     let itemN = document.createTextNode(`${item['edition']} - ${item['sku']}`);
                     itemP.appendChild(itemN);
                     itemDiv.appendChild(itemP);
-                    thisDiv.appendChild(itemDiv);
+                    skuDivArr.push(itemDiv);
+                    // skusDiv.appendChild(itemDiv);
                 })
+
+                // If a user clicks on the overall div, show skus and editions on the right
+                thisDiv.onclick = () => {
+                    // Clear results first
+                    while (skusDiv.firstChild) {
+                        skusDiv.removeChild(skusDiv.firstChild);
+                    }
+                    // Add results from arr
+                    skuDivArr.forEach(skuDiv => {
+                        skusDiv.appendChild(skuDiv);
+                    })
+                }
                 
-                resultsDiv.appendChild(thisDiv)
+                titlesDiv.appendChild(thisDiv);
+
+                // resultsDiv.appendChild(thisDiv)
 
                 // All json
                 // let title = JSON.stringify(result)
